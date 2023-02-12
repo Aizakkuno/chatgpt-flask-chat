@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Chat App - {{ username }}</title>
+  </head>
+  <body>
+    <h1>Chat App - {{ username }}</h1>
+    <div id="message-container">
+      {% for message in messages %}
+        <div class="message">
+          <strong>{{ message.user.name }}:</strong> {{ message.text }}
+        </div>
+      {% endfor %}
+    </div>
+    <form id="message-form">
+      <input type="text" id="message-input" placeholder="Type a message...">
+      <button type="submit">Send</button>
+    </form>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.5.1/socket.io.js" integrity="sha384-kAkAf5FGbmBl5MPBC3qks5+e1Z76AGGp0J0mW+X9c9V7IQKNJxFOIS+7nhM1aA/w" crossorigin="anonymous"></script>
+    <script>
+      var socket = io();
+      var username = "{{ username }}";
+      var messageForm = document.getElementById('message-form');
+      var messageInput = document.getElementById('message-input');
+      var messageContainer = document.getElementById('message-container');
+
+      messageForm.addEventListener('submit', function(event) {
+        event.preventDefault();
+        var message = messageInput.value;
+        if (message) {
+          socket.emit('send_message', { username: username, message: message });
+          messageInput.value = '';
+        }
+      });
+
+      socket.on('receive_message', function(data) {
+        var message = document.createElement('div');
+        message.className = 'message';
+        message.innerHTML = '<strong>' + data.username + ':</strong> ' + data.message;
+        messageContainer.appendChild(message);
+      });
+    </script>
+  </body>
+</html>
